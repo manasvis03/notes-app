@@ -1,0 +1,787 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>✨ Notes App with AI Search</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+        animation: slideDown 0.6s ease;
+      }
+
+      header h1 {
+        font-size: 3em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      }
+
+      header p {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .tab-btn {
+        padding: 12px 24px;
+        background: white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 1em;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      }
+
+      .tab-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        transform: scale(1.05);
+      }
+
+      .tab-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        animation: fadeIn 0.6s ease;
+      }
+
+      section h2 {
+        color: #667eea;
+        margin-bottom: 20px;
+        font-size: 1.6em;
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 10px;
+      }
+
+      input[type="text"],
+      textarea {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 1em;
+        transition: all 0.3s ease;
+      }
+
+      input[type="text"]:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+
+      button {
+        padding: 12px 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button.danger {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      }
+
+      button.secondary {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      }
+
+      .full-width {
+        width: 100%;
+      }
+
+      .search-container {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      #q {
+        flex: 1;
+      }
+
+      #searchBtn {
+        width: 120px;
+      }
+
+      .search-type {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .search-type label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+      }
+
+      .search-type input[type="radio"] {
+        cursor: pointer;
+        width: auto;
+        margin: 0;
+      }
+
+      #results,
+      #notesList {
+        list-style: none;
+        margin-top: 20px;
+      }
+
+      .result-item,
+      .note-item {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 10px;
+        border-left: 5px solid #667eea;
+        transition: all 0.3s ease;
+      }
+
+      .note-item {
+        border-left-color: #4facfe;
+      }
+
+      .result-item:hover,
+      .note-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+      }
+
+      .result-title,
+      .note-title {
+        font-weight: bold;
+        color: #667eea;
+        font-size: 1.1em;
+        margin-bottom: 5px;
+      }
+
+      .result-content,
+      .note-content {
+        color: #555;
+        margin-bottom: 8px;
+        line-height: 1.5;
+      }
+
+      .result-score {
+        font-size: 0.85em;
+        color: #999;
+        display: inline-block;
+        background: rgba(102, 126, 234, 0.1);
+        padding: 4px 10px;
+        border-radius: 20px;
+        margin-right: 10px;
+      }
+
+      .note-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .note-actions button {
+        flex: 1;
+        padding: 8px;
+        font-size: 0.9em;
+      }
+
+      .edit-form {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 10px;
+        display: none;
+      }
+
+      .edit-form.active {
+        display: block;
+      }
+
+      .tag-badge {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: bold;
+        display: inline-block;
+        margin-right: 5px;
+        margin-bottom: 5px;
+      }
+
+      .category-badge {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: bold;
+        display: inline-block;
+        margin-right: 5px;
+      }
+
+      .category-select {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 1em;
+        transition: all 0.3s ease;
+      }
+
+      .category-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .filter-buttons {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+      }
+
+      .filter-btn {
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.9em;
+        font-weight: bold;
+        transition: all 0.2s ease;
+      }
+
+      .filter-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 3px 10px rgba(132, 250, 176, 0.3);
+      }
+
+      .filter-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      .note-meta {
+        margin-top: 10px;
+        font-size: 0.9em;
+      }
+
+      .success-message {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        animation: slideIn 0.3s ease;
+      }
+
+      .error-message {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        animation: slideIn 0.3s ease;
+      }
+
+      .empty-state {
+        text-align: center;
+        color: #999;
+        padding: 30px;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @media (max-width: 768px) {
+        header h1 {
+          font-size: 2em;
+        }
+
+        .search-container {
+          flex-direction: column;
+        }
+
+        #searchBtn {
+          width: 100%;
+        }
+
+        .tabs {
+          flex-direction: column;
+        }
+
+        .note-actions {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🚀 Smart Notes with AI</h1>
+        <p>✨ Create • Edit • Delete • Search by Meaning</p>
+      </header>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(event, 'create')">📝 Create</button>
+        <button class="tab-btn" onclick="switchTab(event, 'view')">📋 View All</button>
+        <button class="tab-btn" onclick="switchTab(event, 'search')">🔍 Search</button>
+      </div>
+
+      <!-- CREATE TAB -->
+      <div id="create" class="tab-content active">
+        <section>
+          <h2>📝 Create New Note</h2>
+          <form id="noteForm">
+            <input id="title" type="text" placeholder="Note title..." required />
+            <textarea id="content" placeholder="Write your thoughts here..." required></textarea>
+            
+            <select id="category" class="category-select">
+              <option value="">Select category...</option>
+              <option value="Personal">Personal</option>
+              <option value="Work">Work</option>
+              <option value="Study">Study</option>
+              <option value="Ideas">Ideas</option>
+              <option value="Tasks">Tasks</option>
+            </select>
+
+            <input id="tags" type="text" placeholder="Add tags (comma-separated: python, tutorial, ai)" />
+            
+            <button type="submit" class="full-width">✨ Add Note</button>
+          </form>
+          <div id="createMessage"></div>
+        </section>
+      </div>
+
+      <!-- VIEW ALL TAB -->
+      <div id="view" class="tab-content">
+        <section>
+          <h2>📋 All Notes</h2>
+          <button class="secondary full-width" onclick="loadAllNotes()" style="margin-bottom: 15px;">🔄 Refresh Notes</button>
+          
+          <div id="tagFilters" class="filter-buttons"></div>
+          <div id="categoryFilters" class="filter-buttons"></div>
+          
+          <button onclick="clearFilters()" style="margin-bottom: 15px; background: #f5f5f5; color: #666;" class="full-width">Clear Filters</button>
+          
+          <div id="viewMessage"></div>
+          <ul id="notesList"></ul>
+        </section>
+      </div>
+
+      <!-- SEARCH TAB -->
+      <div id="search" class="tab-content">
+        <section>
+          <h2>🔍 Search Notes</h2>
+          
+          <div class="search-type">
+            <label>
+              <input type="radio" name="searchType" value="semantic" checked />
+              🤖 Semantic (by meaning)
+            </label>
+            <label>
+              <input type="radio" name="searchType" value="keyword" />
+              🔤 Keyword (exact match)
+            </label>
+          </div>
+
+          <div class="search-container">
+            <input id="q" type="text" placeholder="Search by meaning or keywords..." />
+            <button id="searchBtn">🔍 Search</button>
+          </div>
+          <div id="searchMessage"></div>
+          <ul id="results"></ul>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      let currentFilter = null;
+
+      // Tab switching
+      function switchTab(event, tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        event.target.classList.add('active');
+
+        if (tabName === 'view') {
+          loadAllNotes();
+          loadFilters();
+        }
+      }
+
+      // Load filter buttons
+      async function loadFilters() {
+        try {
+          const [tagsRes, catsRes] = await Promise.all([
+            fetch('/tags'),
+            fetch('/categories')
+          ]);
+          const tagsData = await tagsRes.json();
+          const catsData = await catsRes.json();
+
+          // Render tag filters
+          const tagFilters = document.getElementById('tagFilters');
+          tagFilters.innerHTML = '<div style="width: 100%; color: #999; font-size: 0.9em; margin-bottom: 5px;">🏷️ Tags:</div>';
+          tagsData.tags.forEach(tag => {
+            const btn = document.createElement('button');
+            btn.className = 'filter-btn';
+            btn.textContent = tag;
+            btn.onclick = () => filterByTag(tag);
+            tagFilters.appendChild(btn);
+          });
+
+          // Render category filters
+          const catFilters = document.getElementById('categoryFilters');
+          catFilters.innerHTML = '<div style="width: 100%; color: #999; font-size: 0.9em; margin-bottom: 5px;">📁 Categories:</div>';
+          catsData.categories.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = 'filter-btn';
+            btn.textContent = cat;
+            btn.onclick = () => filterByCategory(cat);
+            catFilters.appendChild(btn);
+          });
+        } catch (err) {
+          console.error('Failed to load filters:', err);
+        }
+      }
+
+      async function filterByTag(tag) {
+        try {
+          const res = await fetch(`/filter/tag/${encodeURIComponent(tag)}`);
+          const notes = await res.json();
+          displayNotes(notes);
+          currentFilter = `Tag: ${tag}`;
+          showMessage('viewMessage', `Filtered by tag: <strong>${tag}</strong>`, 'success');
+        } catch (err) {
+          showMessage('viewMessage', 'Filter failed: ' + err.message, 'error');
+        }
+      }
+
+      async function filterByCategory(cat) {
+        try {
+          const res = await fetch(`/filter/category/${encodeURIComponent(cat)}`);
+          const notes = await res.json();
+          displayNotes(notes);
+          currentFilter = `Category: ${cat}`;
+          showMessage('viewMessage', `Filtered by category: <strong>${cat}</strong>`, 'success');
+        } catch (err) {
+          showMessage('viewMessage', 'Filter failed: ' + err.message, 'error');
+        }
+      }
+
+      function clearFilters() {
+        currentFilter = null;
+        loadAllNotes();
+      }
+
+      // Create Note
+      document.getElementById('noteForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('title').value.trim();
+        const content = document.getElementById('content').value.trim();
+        const category = document.getElementById('category').value.trim();
+        const tags = document.getElementById('tags').value.trim();
+
+        if (!title || !content) {
+          showMessage('createMessage', 'Please fill in title and content!', 'error');
+          return;
+        }
+
+        try {
+          const res = await fetch('/notes', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({title, content, tags, category})
+          });
+          const data = await res.json();
+          showMessage('createMessage', `✅ Note #${data.id} added successfully!`, 'success');
+          document.getElementById('noteForm').reset();
+        } catch (err) {
+          showMessage('createMessage', 'Failed to add note: ' + err.message, 'error');
+        }
+      });
+
+      // Load All Notes
+      async function loadAllNotes() {
+        try {
+          const res = await fetch('/notes');
+          const notes = await res.json();
+          displayNotes(notes);
+        } catch (err) {
+          showMessage('viewMessage', 'Failed to load notes: ' + err.message, 'error');
+        }
+      }
+
+      function displayNotes(notes) {
+        const ul = document.getElementById('notesList');
+        ul.innerHTML = '';
+
+        if (notes.length === 0) {
+          ul.innerHTML = '<li class="empty-state">No notes yet. Create your first note! 📝</li>';
+          return;
+        }
+
+        notes.forEach(note => {
+          const li = document.createElement('li');
+          li.className = 'note-item';
+          const tagsHtml = note.tags ? note.tags.split(',').map(tag => 
+            `<span class="tag-badge">${tag.trim()}</span>`
+          ).join('') : '';
+          const catHtml = note.category ? `<span class="category-badge">${note.category}</span>` : '';
+
+          li.innerHTML = `
+            <div class="note-title">#${note.id} ${note.title}</div>
+            <div class="note-content">${note.content}</div>
+            <div class="note-meta">
+              ${catHtml}
+              ${tagsHtml}
+            </div>
+            <div class="note-actions">
+              <button class="secondary" onclick="openEditForm(${note.id}, '${escapeHtml(note.title)}', '${escapeHtml(note.content)}', '${escapeHtml(note.tags)}', '${escapeHtml(note.category)}')">✏️ Edit</button>
+              <button class="danger" onclick="deleteNoteFunc(${note.id})">🗑️ Delete</button>
+            </div>
+            <div id="edit-${note.id}" class="edit-form">
+              <input type="text" id="edit-title-${note.id}" placeholder="Title" value="${escapeHtml(note.title)}" />
+              <textarea id="edit-content-${note.id}" placeholder="Content">${escapeHtml(note.content)}</textarea>
+              <select id="edit-category-${note.id}" class="category-select">
+                <option value="">Select category...</option>
+                <option value="Personal" ${note.category === 'Personal' ? 'selected' : ''}>Personal</option>
+                <option value="Work" ${note.category === 'Work' ? 'selected' : ''}>Work</option>
+                <option value="Study" ${note.category === 'Study' ? 'selected' : ''}>Study</option>
+                <option value="Ideas" ${note.category === 'Ideas' ? 'selected' : ''}>Ideas</option>
+                <option value="Tasks" ${note.category === 'Tasks' ? 'selected' : ''}>Tasks</option>
+              </select>
+              <input type="text" id="edit-tags-${note.id}" placeholder="Tags (comma-separated)" value="${escapeHtml(note.tags)}" />
+              <button onclick="saveEdit(${note.id})" style="width: 48%; margin-right: 2%;">💾 Save</button>
+              <button class="secondary" onclick="closeEditForm(${note.id})" style="width: 48%;">✖️ Cancel</button>
+            </div>
+          `;
+          ul.appendChild(li);
+        });
+      }
+
+      // Edit Form
+      function openEditForm(noteId, title, content, tags, category) {
+        document.getElementById(`edit-${noteId}`).classList.add('active');
+      }
+
+      function closeEditForm(noteId) {
+        document.getElementById(`edit-${noteId}`).classList.remove('active');
+      }
+
+      async function saveEdit(noteId) {
+        const title = document.getElementById(`edit-title-${noteId}`).value.trim();
+        const content = document.getElementById(`edit-content-${noteId}`).value.trim();
+        const category = document.getElementById(`edit-category-${noteId}`).value.trim();
+        const tags = document.getElementById(`edit-tags-${noteId}`).value.trim();
+
+        if (!title || !content) {
+          showMessage('viewMessage', 'Please fill in all fields!', 'error');
+          return;
+        }
+
+        try {
+          const res = await fetch(`/notes/${noteId}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({title, content, tags, category})
+          });
+
+          if (res.ok) {
+            showMessage('viewMessage', `✅ Note #${noteId} updated!`, 'success');
+            loadAllNotes();
+          } else {
+            showMessage('viewMessage', 'Failed to update note', 'error');
+          }
+        } catch (err) {
+          showMessage('viewMessage', 'Error: ' + err.message, 'error');
+        }
+      }
+
+      // Delete Note
+      async function deleteNoteFunc(noteId) {
+        if (!confirm(`Delete note #${noteId}? This cannot be undone.`)) return;
+
+        try {
+          const res = await fetch(`/notes/${noteId}`, {method: 'DELETE'});
+          if (res.ok) {
+            showMessage('viewMessage', `✅ Note #${noteId} deleted!`, 'success');
+            loadAllNotes();
+          }
+        } catch (err) {
+          showMessage('viewMessage', 'Failed to delete note: ' + err.message, 'error');
+        }
+      }
+
+      // Search
+      document.getElementById('searchBtn').addEventListener('click', async () => {
+        const q = document.getElementById('q').value.trim();
+        const searchType = document.querySelector('input[name="searchType"]:checked').value;
+
+        if (!q) {
+          showMessage('searchMessage', 'Please enter a search query!', 'error');
+          return;
+        }
+
+        try {
+          const res = await fetch(`/search?q=${encodeURIComponent(q)}&search_type=${searchType}`);
+          const hits = await res.json();
+          const ul = document.getElementById('results');
+          ul.innerHTML = '';
+
+          if (hits.length === 0) {
+            ul.innerHTML = '<li class="empty-state">No notes found. Try different keywords! 🤔</li>';
+            return;
+          }
+
+          hits.forEach(h => {
+            const li = document.createElement('li');
+            li.className = 'result-item';
+            const relevance = h.score ? (h.score * 100).toFixed(1) : '—';
+            const relevanceIcon = h.score > 0.7 ? '🔥' : h.score > 0.5 ? '⭐' : '💡';
+            const tagsHtml = h.tags ? h.tags.split(',').map(tag => 
+              `<span class="tag-badge">${tag.trim()}</span>`
+            ).join('') : '';
+            const catHtml = h.category ? `<span class="category-badge">${h.category}</span>` : '';
+
+            li.innerHTML = `
+              <div class="result-title">${relevanceIcon} ${h.title}</div>
+              <div class="result-content">${h.content}</div>
+              <div class="note-meta">${catHtml} ${tagsHtml}</div>
+              ${h.score ? `<span class="result-score">Relevance: ${relevance}%</span>` : ''}
+            `;
+            ul.appendChild(li);
+          });
+        } catch (err) {
+          showMessage('searchMessage', 'Search failed: ' + err.message, 'error');
+        }
+      });
+
+      // Allow Enter key for search
+      document.getElementById('q').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') document.getElementById('searchBtn').click();
+      });
+
+      // Message display
+      function showMessage(elementId, msg, type) {
+        const el = document.getElementById(elementId);
+        el.innerHTML = `<div class="${type}-message">${msg}</div>`;
+        setTimeout(() => { el.innerHTML = ''; }, 4000);
+      }
+
+      // Escape HTML
+      function escapeHtml(text) {
+        const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
+        return text.replace(/[&<>"']/g, m => map[m]);
+      }
+
+      // Load notes on page load
+      window.addEventListener('load', () => {
+        loadAllNotes();
+      });
+    </script>
+  </body>
+</html>
