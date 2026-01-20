@@ -1,42 +1,38 @@
 # Smart Notes App with AI Search
 
 A beautiful, feature-rich notes application with AI-powered semantic search, built with FastAPI and vanilla JavaScript.
+Features
 
-## Features
-
-### Core Features
+Core Features
 - **Create Notes** - Add notes with title, content, tags, and category
 - **Edit Notes** - Update notes inline with a beautiful interface
 - **Delete Notes** - Remove notes you no longer need
 - **View All Notes** - Browse all your notes in one place
-
-### Search & Discovery
+Search & Discovery
 - **Semantic Search** - AI-powered search that understands meaning, not just keywords
   - Finds notes by concept and intent
   - Relevance scoring
   - Uses SentenceTransformers embeddings
-  
-- **Keyword Search** - Fast exact-match searching
+Keyword Search** - Fast exact-match searching
   - Search by title, content, or tags
   - Find exact text matches
-
-### Organization
+Organization
 - **Tags** - Add comma-separated tags to organize notes
   - Auto-generated filter buttons
   - Quick filtering by tag
 
-- **Categories** - Organize notes by category
+Organize notes by category
   - Built-in categories: Personal, Work, Study, Ideas, Tasks
   - Quick filtering by category
 
-### Technical Features
+ Technical Features
 - **Beautiful UI** - Modern gradient design with animations
 - **Responsive** - Works on desktop and mobile
 - **Fast** - Instant note creation and updates
 - **No Authentication** - Simple, direct access to your notes
 - **Persistent Storage** - SQLite database with vector embeddings
 
-## Installation
+ Installation
 
 ### Prerequisites
 - Python 3.8+
@@ -89,13 +85,13 @@ Open your browser and go to: **http://127.0.0.1:8000**
 2. Click **Edit** to update or **Delete** to remove
 3. For edit, click **Save** or **Cancel**
 
-### 📋 View All Tab
+###  View All Tab
 - See all notes in chronological order
 - **Edit** any note (inline form appears)
 - **Delete** notes with confirmation
 - Refresh button to reload
 
-### 🔍 Search Tab
+###  Search Tab
 - **Semantic Search** (default) – Find by meaning
 - **Keyword Search** – Find by exact text match
 - Relevance scoring for semantic results
@@ -138,7 +134,7 @@ curl -X PUT http://127.0.0.1:8000/notes/1 \
 curl -X DELETE http://127.0.0.1:8000/notes/1
 ```
 
-## 🏗️ Project Structure
+##  Project Structure
 
 ```
 app/
@@ -178,7 +174,7 @@ README.md                  # This file
 2. Simple substring matching on title & content
 3. Results returned in order
 
-## 📦 Dependencies
+##  Dependencies
 
 - **fastapi** – Modern web framework
 - **uvicorn** – ASGI server
@@ -187,7 +183,7 @@ README.md                  # This file
 - **pydantic** – Data validation
 - **python-multipart** – File uploads
 
-## 🎨 UI Customization
+##  UI Customization
 
 Edit `app/static/index.html` to customize:
 - Colors (currently purple/indigo gradient)
@@ -200,7 +196,7 @@ Edit `app/main.py` to customize:
 - Semantic similarity threshold
 - API response formats
 
-## 🧠 Using Different Embedding Models
+##  Using Different Embedding Models
 
 Edit `app/embeddings.py` line 9:
 
@@ -212,7 +208,7 @@ _MODEL = SentenceTransformer("all-MiniLM-L6-v2")   # Faster
 
 More models: https://huggingface.co/sentence-transformers
 
-## 📊 Database Schema
+##  Database Schema
 
 ```sql
 CREATE TABLE notes (
@@ -222,14 +218,14 @@ CREATE TABLE notes (
 )
 ```
 
-## 🔐 Notes
+##  Notes
 
 - No authentication required (local use)
 - SQLite database stored in `app/notes.db`
 - Embeddings cached in `app/vectors/`
 - No external API dependencies
 
-## 🚀 Deployment
+##  Deployment
 
 For production, consider:
 - Replace SQLite with PostgreSQL
